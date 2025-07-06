@@ -1,7 +1,7 @@
-import ChatBot from "./pages/ChatBot";
+import Chatbot from "./pages/Chatbot";
 
 function App() {
-  return <ChatBot />;
+  return <Chatbot />;
 }
 
 export default App;
