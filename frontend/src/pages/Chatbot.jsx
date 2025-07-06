@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { sendMessageToGemini } from "../services/geminiAPI";
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
-import logo from '../assets/logo.png';
+import logo from '/logo.png';
 
 function ChatBot() {
   const [messages, setMessages] = useState([]);
