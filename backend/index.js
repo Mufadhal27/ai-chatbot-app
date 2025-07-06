@@ -1,3 +1,7 @@
+import fetch from "node-fetch";
+if (!globalThis.fetch) globalThis.fetch = fetch;
+
+
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
