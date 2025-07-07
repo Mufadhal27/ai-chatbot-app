@@ -1,10 +1,18 @@
 {
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/chat.js"
+    }
+  ],
   "builds": [
     {
-      "src": "frontend/package.json",
-      "use": "@vercel/static-build",
+      "src": "chat.js",
+      "use": "@vercel/node",
       "config": {
-        "distDir": "dist"
+        "maxLambdaSize": "15mb",
+        "memory": 256,
+        "runtime": "nodejs20.x"
       }
     }
   ],
