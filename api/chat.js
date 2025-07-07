@@ -1,23 +1,15 @@
 import fetch from "node-fetch";
 if (!globalThis.fetch) globalThis.fetch = fetch;
 
-import express from "express";
-import cors from "cors";
+// Import library yang dibutuhkan
 import mongoose from "mongoose";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-
-// Inisialisasi Express app
-const app = express();
-
-// Middleware
-app.use(cors()); 
-app.use(express.json());
 
 // ====== MONGODB SETUP ======
 let cachedDb = null;
 
 async function connectToDatabase() {
-  if (cachedDb) {
+  if (cachedDb && cachedDb.connections[0].readyState === 1) {
     console.log("✅ Menggunakan koneksi MongoDB yang sudah ada.");
     return cachedDb;
   }
@@ -47,10 +39,13 @@ async function connectToDatabase() {
 }
 
 // ====== SCHEMA ======
+// Definisi skema Mongoose untuk chat
 let Chat;
 try {
+  // Coba dapatkan model jika sudah terdaftar (untuk hot-reloading di dev)
   Chat = mongoose.model("Chat");
 } catch (error) {
+  // Jika belum, daftarkan model baru
   const chatSchema = new mongoose.Schema({
     prompt: String,
     reply: String,
@@ -60,6 +55,7 @@ try {
 }
 
 // ====== GEMINI SETUP ======
+// Mengambil API Key Gemini dari environment variable
 const API_KEY = process.env.GEMINI_API_KEY;
 
 if (!API_KEY) {
@@ -70,8 +66,14 @@ if (!API_KEY) {
 const genAI = new GoogleGenerativeAI(API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-// ====== ROUTES ======
-app.post("/api/chat", async (req, res) => {
+// ====== SERVERLESS FUNCTION HANDLER ======
+// Ini adalah fungsi utama yang akan diekspor dan dijalankan oleh Vercel
+export default async function handler(req, res) {
+  // Hanya izinkan permintaan POST
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: "Metode tidak diizinkan. Hanya POST yang didukung." });
+  }
+
   // Pastikan koneksi ke DB sebelum setiap permintaan
   try {
     await connectToDatabase();
@@ -80,13 +82,15 @@ app.post("/api/chat", async (req, res) => {
     return res.status(500).json({ error: "Terjadi kesalahan server: Gagal konek ke database." });
   }
 
+  // Mengambil prompt dari body permintaan
   const { prompt } = req.body;
 
   if (!prompt) {
-    return res.status(400).json({ error: "Prompt tidak ditemukan" });
+    return res.status(400).json({ error: "Prompt tidak ditemukan dalam permintaan." });
   }
 
   try {
+    // Memulai sesi chat dengan Gemini
     const chat = model.startChat({ history: [] }); 
     const result = await chat.sendMessage(prompt);
     const response = await result.response;
@@ -96,15 +100,16 @@ app.post("/api/chat", async (req, res) => {
     const newChat = new Chat({ prompt, reply });
     await newChat.save();
 
-    res.json({ reply });
+    // Mengirimkan balasan ke frontend
+    res.status(200).json({ reply });
   } catch (error) {
     console.error("❌ Error Gemini atau simpan ke DB:", error);
+    // Penanganan error spesifik untuk kunci API
     if (error.message.includes("API key not valid")) {
         res.status(500).json({ error: "Terjadi masalah dengan kunci API Gemini. Harap periksa kunci Anda." });
     } else {
-        res.status(500).json({ error: "Gagal mendapatkan respon dari Gemini atau menyimpan chat." });
+      // Penanganan error umum
+      res.status(500).json({ error: "Gagal mendapatkan respon dari Gemini atau menyimpan chat." });
     }
   }
-});
-
-export default app; 
+}
