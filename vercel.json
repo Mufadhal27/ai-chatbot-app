@@ -7,7 +7,7 @@
   ],
   "builds": [
     {
-      "src": "api/chat.js", 
+      "src": "api/chat.js",
       "use": "@vercel/node",
       "config": {
         "maxLambdaSize": "15mb",
