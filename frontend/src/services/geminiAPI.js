@@ -1,14 +1,15 @@
 import axios from "axios";
 
-const API_ENDPOINT = "/api/chat";
+const backendApiUrl = import.meta.env.VITE_APP_BACKEND_URL;
 
 export const sendMessageToGemini = async (prompt) => {
   try {
-    const response = await axios.post(API_ENDPOINT, { prompt });
+    // Menggunakan URL lengkap yang diambil dari environment variable
+    const response = await axios.post(backendApiUrl, { prompt });
     return response.data.reply;
   } catch (error) {
     console.error("❌ Error di frontend saat panggil backend:", error);
-    // Tambah penanganan error yang lebih spesifik jika diperlukan
+    // Penanganan error yang lebih spesifik
     if (error.response) {
       // Server merespons dengan status code selain 2xx
       console.error("Data:", error.response.data);
@@ -16,7 +17,7 @@ export const sendMessageToGemini = async (prompt) => {
       console.error("Headers:", error.response.headers);
       throw new Error(error.response.data.error || "Terjadi kesalahan di server.");
     } else if (error.request) {
-      // Request dibuat tapi tidak ada respons
+      // Permintaan dibuat tapi tidak ada respons
       console.error("Request:", error.request);
       throw new Error("Tidak ada respons dari server. Periksa koneksi atau URL.");
     } else {
