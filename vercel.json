@@ -1,13 +1,7 @@
 {
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/chat.js"
-    }
-  ],
   "builds": [
     {
-      "src": "chat.js",
+      "src": "api/chat.js",
       "use": "@vercel/node",
       "config": {
         "maxLambdaSize": "15mb",
@@ -16,7 +10,6 @@
       }
     }
   ],
-  "cleanUrls": true,
   "headers": [
     {
       "source": "/(.*)",
