@@ -5,25 +5,6 @@
       "destination": "/api/chat"
     }
   ],
-  "builds": [
-    {
-      "src": "frontend/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist" 
-      },
-      "rootDirectory": "frontend"
-    },
-    {
-      "src": "api/chat.js",
-      "use": "@vercel/node",
-      "config": {
-        "maxLambdaSize": "15mb",
-        "memory": 256,
-        "runtime": "nodejs20.x"
-      }
-    }
-  ],
   "cleanUrls": true,
   "headers": [
     {
