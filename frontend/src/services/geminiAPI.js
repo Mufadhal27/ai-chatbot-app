@@ -5,6 +5,7 @@ const backendApiUrl = import.meta.env.VITE_APP_BACKEND_URL;
 export const sendMessageToGemini = async (prompt) => {
   try {
     // Menggunakan URL lengkap yang diambil dari environment variable
+    console.log("URL Backend yang akan dipanggil:", backendApiUrl);
     const response = await axios.post(backendApiUrl, { prompt });
     return response.data.reply;
   } catch (error) {
